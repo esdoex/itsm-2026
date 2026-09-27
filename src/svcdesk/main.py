@@ -3,6 +3,7 @@
 import os
 import sqlite3
 from datetime import datetime, time, timedelta, timezone
+from json import JSONDecodeError
 from uuid import uuid4
 from zoneinfo import ZoneInfo
 
@@ -11,6 +12,8 @@ from fastapi.exceptions import RequestValidationError
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.exceptions import HTTPException as StarletteHTTPException
+
+from svcdesk.dora import calculate_metrics
 
 app = FastAPI(title="svcdesk")
 
@@ -407,6 +410,60 @@ async def http_exception_handler(_request: Request, exc: HTTPException):
 @app.get("/health")
 def health() -> dict[str, str]:
     return {"status": "ok", "service": "svcdesk"}
+
+
+@app.post("/dora/metrics")
+async def dora_metrics(request: Request) -> dict[str, object]:
+    try:
+        payload = await request.json()
+    except (JSONDecodeError, UnicodeDecodeError) as exc:
+        raise json_error("validation", "request body must be valid JSON", 400) from exc
+    try:
+        return calculate_metrics(payload)
+    except ValueError as exc:
+        raise json_error("validation", str(exc), 422) from exc
+
+
+@app.get("/dora/ticket-events")
+def dora_ticket_events() -> list[dict[str, str]]:
+    with sqlite3.connect(DB_PATH) as conn:
+        conn.row_factory = sqlite3.Row
+        rows = conn.execute(
+            """
+            SELECT id, priority, state, created_at, acknowledged_at, resolved_at, closed_at
+            FROM tickets
+            """
+        ).fetchall()
+
+    phases = (
+        ("created", "created_at", "new"),
+        ("acknowledged", "acknowledged_at", "acknowledged"),
+        ("resolved", "resolved_at", "resolved"),
+        ("closed", "closed_at", "closed"),
+    )
+    ordered: list[tuple[datetime, str, dict[str, str]]] = []
+    for row in rows:
+        for phase, timestamp_column, state in phases:
+            timestamp = row[timestamp_column]
+            if timestamp is None:
+                continue
+            at = parse_rfc3339(timestamp)
+            ordered.append(
+                (
+                    at,
+                    row["id"],
+                    {
+                        "ticket_id": row["id"],
+                        "at": at.isoformat().replace("+00:00", "Z"),
+                        "phase": phase,
+                        "priority": row["priority"],
+                        "state": state,
+                    },
+                )
+            )
+
+    ordered.sort(key=lambda item: (item[0], item[1]))
+    return [event for _, _, event in ordered]
 
 
 @app.post("/tickets", response_model=TicketResponse, status_code=201)

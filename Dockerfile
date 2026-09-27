@@ -10,6 +10,8 @@ RUN apt-get update \
     && pip install --no-cache-dir httpx2
 
 COPY src/ /app/src/
+COPY fixtures/ /app/fixtures/
+COPY metrics.json /app/metrics.json
 
 RUN mkdir -p /data
 ENV TZ=Europe/Warsaw
