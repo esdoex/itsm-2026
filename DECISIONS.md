@@ -4,54 +4,43 @@ svcdesk_decisions:
   C2: immutable      # reopen | immutable
   C3: vip            # matrix | vip
 ---
-<!-- ai-generated: ??% - TODO: replace ?? with your estimate and say how AI was used (the advisory flags this line until you do) -->
+<!-- ai-generated: 100% - w pełni wygenerowane przy pomocy Github Copilot -->
 
 # Decisions
 
-<!--
-How to fill this in (delete this comment when you are done):
-- The three values in the front matter must be the ones your RUNNING service exhibits. The checker probes the
-  service (checks 2.41, 2.35, 2.46) and compares them with this file (L1-CORE-4).
-- Keep the three headings starting with "## C1", "## C2", "## C3" and the five bold labels in each section. Write
-  at least 20 characters after every label; the lecturer reads this document, so write what you would say to
-  the service owner, not the minimum.
-- "Service owner": the role (never a person's name) who would sign this decision off, and why it is theirs.
-- "Customer outcome": what the reporter or the organisation gets from this choice, in one or two sentences.
-- Update the ai-generated line above to say how much of this text an AI wrote and how.
--->
 
 ## C1 - SLA clock for P1
 
-**Decision:** TODO
+**Decision:** Czas SLA dla zgłoszeń o najwyższym priorytecie P1 jest odliczany w czasie rzeczywistym (wallclock), przez 24 godziny na dobę, 7 dni w tygodniu.
 
-**Rejected alternative:** TODO
+**Rejected alternative:** Odrzucono wariant, w którym czas rozwiązania dla zgłoszeń P1 byłby wstrzymywany na noc i weekendy, ograniczając się tylko do godzin biznesowych.
 
-**Reason:** TODO
+**Reason:** Priorytet P1 oznacza krytyczną awarię (np. brak dostępu do głównego serwera). Wstrzymywanie zegara na weekend fałszowałoby faktyczny czas przestoju systemów i opóźniałoby reakcję.
 
-**Service owner:** TODO
+**Service owner:** Główny Kierownik IT (IT Operations Manager) – odpowiada za ciągłość działania kluczowej infrastruktury i raportowanie dostępności usług.
 
-**Customer outcome:** TODO
+**Customer outcome:** Organizacja zyskuje pewność, że krytyczne incydenty zgłoszone poza godzinami pracy zostaną podjęte natychmiast, minimalizując straty biznesowe.
 
 ## C2 - Closed tickets and reopening
 
-**Decision:** TODO
+**Decision:** Bilety, które osiągnęły ostateczny stan zamknięcia (closed), są całkowicie niemutowalne i nie mogą zostać ponownie otwarte pod żadnym pozorem.
 
-**Rejected alternative:** TODO
+**Rejected alternative:** Odrzucono możliwość ponownego otwierania przez użytkowników zamkniętych zgłoszeń w regulaminowym oknie 7 dni.
 
-**Reason:** TODO
+**Reason:** Stan "closed" oznacza obustronne potwierdzenie, że problem zniknął. Zezwalanie na powrót do starych biletów po zamknięciu zaburzyłoby statystyki rozwiązywalności przy pierwszym kontakcie (First Call Resolution).
 
-**Service owner:** TODO
+**Service owner:** Menedżer Service Desku (Service Desk Manager) – jego rolą jest dbanie o wiarygodność statystyk zespołu i spójność bazy historycznej.
 
-**Customer outcome:** TODO
+**Customer outcome:** Wymusza to na użytkownikach dokładniejszą weryfikację poprawek przed ostatecznym zamknięciem, a w razie nawrotu wymaga otwarcia nowego zgłoszenia, co zachowuje pełny kontekst audytowy.
 
 ## C3 - VIP reporters and the priority matrix
 
-**Decision:** TODO
+**Decision:** Zgłoszenia pochodzące od użytkowników oznaczonych flagą VIP są automatycznie windowane do poziomu minimum P2, niezależnie od bazowej matrycy wpływu i pilności.
 
-**Rejected alternative:** TODO
+**Rejected alternative:** Odrzucono sztywne trzymanie się matrycy priorytetów (impact i urgency) dla wszystkich pracowników bez robienia wyjątków.
 
-**Reason:** TODO
+**Reason:** Awarie sprzętu u kadry zarządzającej, nawet te o niskim obiektywnym wpływie, blokują kluczowe procesy decyzyjne w firmie. Ich czas jest zbyt cenny na standardowe 72 godziny oczekiwania.
 
-**Service owner:** TODO
+**Service owner:** Dyrektor ds. Relacji z Biznesem (Business Relationship Manager) – odpowiada za relacje działu IT z zarządem i realizację celów biznesowych.
 
-**Customer outcome:** TODO
+**Customer outcome:** Kluczowi decydenci otrzymują błyskawiczną pomoc techniczną, co pozwala im uniknąć frustracji i w pełni skupić się na strategicznym zarządzaniu organizacją.
