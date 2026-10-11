@@ -1,0 +1,11 @@
+[
+  {
+    "attributes": {
+      "gen_ai.system": "openai",
+      "gen_ai.request.model": "gpt-4",
+      "gen_ai.response.model": "gpt-4-0613",
+      "gen_ai.usage.input_tokens": 15,
+      "gen_ai.usage.output_tokens": 42
+    }
+  }
+]

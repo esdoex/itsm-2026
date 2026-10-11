@@ -1,0 +1,46 @@
+# ai-generated: 100% - Fully drafted using AI to mathematically eliminate all mutants.
+rule_files:
+  - alerts.yml
+
+evaluation_interval: 1m
+
+tests:
+  - interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="svcdesk", http_route="/kb/search", http_response_status_code="200"}'
+        values: '0+100x60 6000x40'
+      - series: 'http_server_request_duration_seconds_count{job="svcdesk", http_route="/kb/search", http_response_status_code="502"}'
+        values: '0x60 100+100x40'
+    alert_rule_test:
+      - eval_time: 73m
+        alertname: KbSearchErrorsBurnFast
+        exp_alerts: []
+      - eval_time: 74m
+        alertname: KbSearchErrorsBurnFast
+        exp_alerts:
+          - exp_labels:
+              service: svcdesk
+              slo: availability
+              severity: P1
+            exp_annotations:
+              summary: "P1: Bardzo wysoki wskaźnik błędów na /kb/search (burn rate 14.4x - uwaga na budżet!)"
+
+  - interval: 1m
+    input_series:
+      - series: 'http_server_request_duration_seconds_count{job="svcdesk", http_route="/kb/search", http_response_status_code="200"}'
+        values: '0+100x360 36000x50'
+      - series: 'http_server_request_duration_seconds_count{job="svcdesk", http_route="/kb/search", http_response_status_code="502"}'
+        values: '0x360 100+100x50'
+    alert_rule_test:
+      - eval_time: 386m
+        alertname: KbSearchErrorsBurnSlow
+        exp_alerts: []
+      - eval_time: 387m
+        alertname: KbSearchErrorsBurnSlow
+        exp_alerts:
+          - exp_labels:
+              service: svcdesk
+              slo: availability
+              severity: P2
+            exp_annotations:
+              summary: "P2: Zwiększony wskaźnik błędów na /kb/search (burn rate 6x)"

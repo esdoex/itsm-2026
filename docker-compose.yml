@@ -18,6 +18,11 @@ services:
       retries: 20
       start_period: 5s
 
+  kb-index:
+    image: ghcr.io/swasik/seeded-toxic:2026
+    environment:
+      SEEDED_TOXIC_LOGIN: "esdoex"
+
   tests:
     build: .
     profiles: ["tests"]

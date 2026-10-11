@@ -1,6 +1,8 @@
 # ai-generated: 95% - rebuilt to match the course contract and persisted ticket lifecycle
 
 import os
+import time
+import httpx
 import sqlite3
 from datetime import datetime, time, timedelta, timezone
 from json import JSONDecodeError
@@ -9,9 +11,12 @@ from zoneinfo import ZoneInfo
 
 from fastapi import FastAPI, HTTPException, Query, Request
 from fastapi.exceptions import RequestValidationError
-from fastapi.responses import JSONResponse
+from fastapi.responses import JSONResponse, Response
+from prometheus_client import Histogram, CollectorRegistry, generate_latest
 from pydantic import BaseModel, ConfigDict, Field
 from starlette.exceptions import HTTPException as StarletteHTTPException
+from starlette.routing import Match
+
 
 from svcdesk.dora import calculate_metrics
 
@@ -19,6 +24,17 @@ app = FastAPI(title="svcdesk")
 
 TZ = ZoneInfo("Europe/Warsaw")
 DB_PATH = os.environ.get("SVCDESK_DB", "/data/svcdesk.db")
+KB_INDEX_URL = os.environ.get("KB_INDEX_URL", "http://kb-index:8080")
+registry = CollectorRegistry()
+custom_ladder = [0.02, 0.05, 0.1, 0.15, 0.18, 0.19, 0.20, 0.21, 0.22, 0.23, 0.24, 0.25, 0.3, 0.5, 1.0, 2.5]
+
+REQUEST_DURATION = Histogram(
+    "http_server_request_duration_seconds",
+    "HTTP Request Duration",
+    ["http_request_method", "http_route", "http_response_status_code"],
+    buckets=custom_ladder,
+    registry=registry
+)
 
 
 def utc_now() -> datetime:
@@ -382,6 +398,33 @@ def ticket_breach(ticket: dict, field: str, now_utc: datetime) -> bool:
     return False
 
 
+@app.middleware("http")
+async def metrics_middleware(request: Request, call_next):
+    import time as time_mod  # Zabezpieczony import pod inną nazwą
+    start_time = time_mod.time()
+    route_template = "unmatched"
+    
+    for route in app.router.routes:
+        match, _ = route.matches(request.scope)
+        if match == Match.FULL:
+            route_template = route.path
+            break
+            
+    status_code = 500
+    try:
+        response = await call_next(request)
+        status_code = response.status_code
+        return response
+    except Exception as e:
+        raise e
+    finally:
+        REQUEST_DURATION.labels(
+            http_request_method=request.method, 
+            http_route=route_template, 
+            http_response_status_code=str(status_code)
+        ).observe(time_mod.time() - start_time)
+
+
 @app.exception_handler(RequestValidationError)
 async def validation_exception_handler(_request: Request, exc: RequestValidationError):
     detail = exc.errors()[0] if exc.errors() else {}
@@ -546,6 +589,25 @@ def reopen_ticket(ticket_id: str, request: Request):
         return apply_transition(ticket_id, "reopen", now)
     except KeyError as exc:
         raise json_error("not_found", "ticket not found", 404) from exc
+
+
+@app.get("/metrics")
+async def metrics():
+    return Response(generate_latest(registry), media_type="text/plain; version=0.0.4; charset=utf-8")
+
+
+@app.get("/kb/search")
+async def kb_search(q: str = Query(None)):
+    if not q or len(q) < 1 or len(q) > 200:
+        return JSONResponse(status_code=422, content={"error": {"code": "invalid_query"}})
+    async with httpx.AsyncClient() as client:
+        try:
+            resp = await client.get(f"{KB_INDEX_URL}/search", params={"q": q}, timeout=2.5)
+            if resp.status_code == 200:
+                return {"query": q, "hits": resp.json().get("hits", [])}
+            return JSONResponse(status_code=502, content={"error": {"code": "upstream_unavailable"}})
+        except (httpx.RequestError, httpx.TimeoutException):
+            return JSONResponse(status_code=502, content={"error": {"code": "upstream_unavailable"}})
 
 
 init_db()

@@ -1,0 +1,43 @@
+{
+  "dashboard": {
+    "uid": "svcdesk-lab3",
+    "title": "svcdesk metrics",
+    "schemaVersion": 38,
+    "version": 1,
+    "panels": [
+      {
+        "id": 1,
+        "title": "p99 Latency /kb/search",
+        "type": "timeseries",
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "histogram_quantile(0.99, sum by (le) (rate(http_server_request_duration_seconds_bucket{job=\"svcdesk\", http_route=\"/kb/search\"}[$__rate_interval])))"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Total Request Rate /kb/search",
+        "type": "timeseries",
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"svcdesk\", http_route=\"/kb/search\"}[$__rate_interval]))"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Error Rate 5xx /kb/search",
+        "type": "timeseries",
+        "targets": [
+          {
+            "datasource": { "type": "prometheus", "uid": "prometheus" },
+            "expr": "sum(rate(http_server_request_duration_seconds_count{job=\"svcdesk\", http_route=\"/kb/search\", http_response_status_code=~\"5..\"}[$__rate_interval]))"
+          }
+        ]
+      }
+    ]
+  }
+}
