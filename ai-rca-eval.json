@@ -1,0 +1,35 @@
+{
+  "investigator": {
+    "transcript": "ai-rca/transcript.md",
+    "agent": "ChatGPT",
+    "model": "gpt-4"
+  },
+  "hypotheses": [
+    {
+      "id": "H1",
+      "hypothesis": "Payment service is failing.",
+      "component": "payment",
+      "verdict": "correct",
+      "predicts": "sum(rate(traces_span_metrics_calls_total{service_name=\"payment\", status_code=\"STATUS_CODE_ERROR\"}[5m])) / sum(rate(traces_span_metrics_calls_total{service_name=\"payment\"}[5m])) > 0.05",
+      "result": true,
+      "at": "2026-10-27T21:15:00Z"
+    },
+    {
+      "id": "H2",
+      "hypothesis": "Checkout service is failing.",
+      "component": "checkout",
+      "verdict": "correct",
+      "predicts": "sum(rate(traces_span_metrics_calls_total{service_name=\"checkout\", status_code=\"STATUS_CODE_ERROR\"}[5m])) > 0",
+      "result": true,
+      "at": "2026-10-27T21:15:00Z"
+    },
+    {
+      "id": "H3",
+      "hypothesis": "Email service is failing.",
+      "verdict": "hallucinated",
+      "predicts": "sum(rate(traces_span_metrics_calls_total{service_name=\"email\", status_code=\"STATUS_CODE_ERROR\"}[5m])) > 0",
+      "result": false,
+      "at": "2026-10-27T21:15:00Z"
+    }
+  ]
+}

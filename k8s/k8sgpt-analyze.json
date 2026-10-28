@@ -1,0 +1,17 @@
+{
+  "provider": "openai",
+  "ai": true,
+  "results": [
+    {
+      "kind": "Deployment",
+      "name": "checkout-service",
+      "namespace": "default",
+      "error": [
+        {
+          "text": "High error rate propagation from payment dependency.",
+          "details": "Trace span metrics show continuous STATUS_CODE_ERROR bursts."
+        }
+      ]
+    }
+  ]
+}

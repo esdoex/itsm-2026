@@ -1,0 +1,14 @@
+{
+  "awareness": "2026-10-27T20:51:27Z",
+  "detection": "2026-10-27T21:18:49Z",
+  "classification": "2026-10-27T21:20:00Z",
+  "nis2": {
+    "notification_sent": "2026-10-27T22:00:00Z"
+  },
+  "ksc": {
+    "notification_sent": "2026-10-27T22:10:00Z"
+  },
+  "dora": {
+    "initial_sent": "2026-10-27T21:30:00Z"
+  }
+}

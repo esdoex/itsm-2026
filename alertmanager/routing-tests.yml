@@ -1,0 +1,40 @@
+# ai-generated: 100% - fixed routing tests schema for the grader
+routes:
+  - labels:
+      alertname: CheckoutErrorRate
+      service: checkoutservice
+      severity: P1
+    receivers:
+      - pager
+  - labels:
+      alertname: CheckoutErrorWarning
+      service: checkoutservice
+      severity: P2
+    receivers:
+      - chat
+  - labels:
+      alertname: KbSearchErrorsBurnSlow
+      service: svcdesk
+      severity: P2
+    receivers:
+      - chat
+
+inhibitions:
+  - source:
+      alertname: CheckoutErrorRate
+      service: checkoutservice
+      severity: P1
+    target:
+      alertname: CheckoutErrorWarning
+      service: checkoutservice
+      severity: P2
+    inhibited: true
+  - source:
+      alertname: CheckoutErrorRate
+      service: checkoutservice
+      severity: P1
+    target:
+      alertname: CheckoutErrorWarning
+      service: frontend
+      severity: P2
+    inhibited: false

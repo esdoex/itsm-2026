@@ -1,0 +1,27 @@
+# ai-generated: 100% - Corrected service_name to checkout based on raw metrics
+groups:
+  - name: shop-symptoms
+    rules:
+      - alert: CheckoutErrorRate
+        expr: sum(rate(traces_span_metrics_calls_total{service_name="checkout", span_kind="SPAN_KIND_SERVER", status_code="STATUS_CODE_ERROR"}[5m])) / sum(rate(traces_span_metrics_calls_total{service_name="checkout", span_kind="SPAN_KIND_SERVER"}[5m])) > 0.05
+        labels:
+          severity: P1
+          service: checkoutservice
+        annotations:
+          summary: "P1: Checkout error rate is too high (> 5%)"
+
+      - alert: CheckoutLatencyHigh
+        expr: histogram_quantile(0.99, sum by (le) (rate(traces_span_metrics_duration_milliseconds_bucket{service_name="checkout", span_kind="SPAN_KIND_SERVER"}[5m]))) > 2000
+        labels:
+          severity: P1
+          service: checkoutservice
+        annotations:
+          summary: "P1: Checkout p99 latency is over 2 seconds"
+
+      - alert: CheckoutErrorWarning
+        expr: sum(rate(traces_span_metrics_calls_total{service_name="checkout", span_kind="SPAN_KIND_SERVER", status_code="STATUS_CODE_ERROR"}[5m])) / sum(rate(traces_span_metrics_calls_total{service_name="checkout", span_kind="SPAN_KIND_SERVER"}[5m])) > 0.01
+        labels:
+          severity: P2
+          service: checkoutservice
+        annotations:
+          summary: "P2: Checkout error rate warning (> 1%)"
