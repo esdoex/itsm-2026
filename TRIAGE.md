@@ -1,6 +1,6 @@
 ---
 lab5_triage:
-  image: ghcr.io/TODO-owner/TODO-repo@sha256:TODO           # the digest the image job printed on main, lower case (P-10)
+  image: ghcr.io/esdoex/itsm-2026@sha256:5587029fcebf04e0eaa47875c177195ae77cddaa5758a8aad1a17d1a456e1393
   sarif_receipt: 0                                         # the issue number of the sarif receipt whose files are in bakeoff/sarif/ (P-10)
 ---
 <!-- ai-generated: ??% - TODO one line on how -->
