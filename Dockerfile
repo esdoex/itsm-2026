@@ -7,7 +7,8 @@ RUN apt-get update \
     && apt-get install -y --no-install-recommends tzdata \
     && rm -rf /var/lib/apt/lists/* \
     && pip install --no-cache-dir -r /app/requirements.txt \
-    && pip install --no-cache-dir httpx2
+    && pip install --no-cache-dir httpx2 \
+    && pip uninstall -y pip
 
 COPY src/ /app/src/
 COPY fixtures/ /app/fixtures/
